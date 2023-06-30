@@ -4,6 +4,7 @@ import torch.nn.functional as F
 
 from maml_rl.utils.torch_utils import weighted_normalize
 
+
 class BatchEpisodes(object):
     def __init__(self, batch_size, gamma=0.95, device='cpu'):
         self.batch_size = batch_size

@@ -1,8 +1,8 @@
-import gym
-import torch
-
 from functools import reduce
 from operator import mul
+
+import gymnasium as gym
+import torch
 
 from maml_rl.policies import CategoricalMLPPolicy, NormalMLPPolicy
 

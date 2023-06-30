@@ -1,7 +1,6 @@
 import numpy as np
-
-from gym.vector import SyncVectorEnv as SyncVectorEnv_
-from gym.vector.utils import concatenate, create_empty_array
+from gymnasium.vector import SyncVectorEnv as SyncVectorEnv_
+from gymnasium.vector.utils import concatenate, create_empty_array
 
 
 class SyncVectorEnv(SyncVectorEnv_):
@@ -15,11 +14,12 @@ class SyncVectorEnv(SyncVectorEnv_):
                                             action_space=action_space,
                                             **kwargs)
         for env in self.envs:
+            # print("My env is:!", env.unwrapped.env.unwrapped)
             if not hasattr(env.unwrapped, 'reset_task'):
                 raise ValueError('The environment provided is not a '
                                  'meta-learning environment. It does not have '
                                  'the method `reset_task` implemented.')
-
+        self._dones = np.zeros((self.num_envs,), dtype=np.bool_)
     @property
     def dones(self):
         return self._dones
@@ -29,6 +29,7 @@ class SyncVectorEnv(SyncVectorEnv_):
             env.unwrapped.reset_task(task)
 
     def step_wait(self):
+        self._actions = list(self._actions)
         observations_list, infos = [], []
         batch_ids, j = [], 0
         num_actions = len(self._actions)
@@ -38,7 +39,7 @@ class SyncVectorEnv(SyncVectorEnv_):
                 continue
 
             action = self._actions[j]
-            observation, rewards[j], self._dones[i], info = env.step(action)
+            observation, rewards[j], self._dones[i], _,  info = env.step(action)
             batch_ids.append(i)
 
             if not self._dones[i]:
@@ -51,11 +52,11 @@ class SyncVectorEnv(SyncVectorEnv_):
             observations = create_empty_array(self.single_observation_space,
                                               n=len(observations_list),
                                               fn=np.zeros)
-            concatenate(observations_list,
-                        observations,
-                        self.single_observation_space)
+            # concatenate(observations_list,
+            #             observations,
+            #             self.single_observation_space)
+            concatenate(self.single_observation_space,observations_list,observations)  # (space, items, out)
         else:
             observations = None
-
         return (observations, rewards, np.copy(self._dones),
                 {'batch_ids': batch_ids, 'infos': infos})

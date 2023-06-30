@@ -1,15 +1,15 @@
-import torch
-import torch.multiprocessing as mp
 import asyncio
 import threading
 import time
-
-from datetime import datetime, timezone
 from copy import deepcopy
+from datetime import datetime, timezone
 
-from maml_rl.samplers.sampler import Sampler, make_env
+import torch
+import torch.multiprocessing as mp
+
 from maml_rl.envs.utils.sync_vector_env import SyncVectorEnv
 from maml_rl.episode import BatchEpisodes
+from maml_rl.samplers.sampler import Sampler, make_env
 from maml_rl.utils.reinforcement_learning import reinforce_loss
 
 
@@ -81,12 +81,11 @@ class MultiTaskSampler(Sampler):
                                                env=env)
 
         self.num_workers = num_workers
-
         self.task_queue = mp.JoinableQueue()
         self.train_episodes_queue = mp.Queue()
         self.valid_episodes_queue = mp.Queue()
         policy_lock = mp.Lock()
-
+        
         self.workers = [SamplerWorker(index,
                                       env_name,
                                       env_kwargs,
@@ -231,7 +230,8 @@ class SamplerWorker(mp.Process):
         self.envs = SyncVectorEnv(env_fns,
                                   observation_space=observation_space,
                                   action_space=action_space)
-        self.envs.seed(None if (seed is None) else seed + index * batch_size)
+        worker_seed = None if (seed is None) else seed + index * batch_size
+        self.envs.reset(seed=worker_seed)
         self.batch_size = batch_size
         self.policy = policy
         self.baseline = baseline
@@ -305,7 +305,7 @@ class SamplerWorker(mp.Process):
         return episodes
 
     def sample_trajectories(self, params=None):
-        observations = self.envs.reset()
+        observations, _ = self.envs.reset()
         with torch.no_grad():
             while not self.envs.dones.all():
                 observations_tensor = torch.from_numpy(observations)

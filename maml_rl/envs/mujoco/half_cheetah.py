@@ -1,13 +1,45 @@
 import numpy as np
+from gymnasium import utils
+from gymnasium.envs.mujoco import MujocoEnv
+from gymnasium.envs.mujoco.half_cheetah_v4 import HalfCheetahEnv as HalfCheetahEnv_
+from gymnasium.spaces import Box
 
-from gym.envs.mujoco import HalfCheetahEnv as HalfCheetahEnv_
-
+DEFAULT_CAMERA_CONFIG = {
+    "distance": 4.0,
+}
 
 class HalfCheetahEnv(HalfCheetahEnv_):
+    def __init__(self,         forward_reward_weight=1.0,
+        ctrl_cost_weight=0.1,
+        reset_noise_scale=0.1,**kwargs):
+        utils.EzPickle.__init__(
+            self,
+            forward_reward_weight,
+            ctrl_cost_weight,
+            reset_noise_scale,
+            **kwargs,
+        )
+        self._forward_reward_weight = forward_reward_weight
+
+        self._ctrl_cost_weight = ctrl_cost_weight
+
+        self._reset_noise_scale = reset_noise_scale
+        observation_space = Box(
+                low=-np.inf, high=np.inf, shape=(20,), dtype=np.float32
+            )
+        MujocoEnv.__init__(
+            self,
+            "half_cheetah.xml",
+            5,
+            observation_space=observation_space,
+            default_camera_config=DEFAULT_CAMERA_CONFIG,
+            **kwargs,
+        )
+
     def _get_obs(self):
         return np.concatenate([
-            self.sim.data.qpos.flat[1:],
-            self.sim.data.qvel.flat,
+            self.data.qpos.flat[1:],
+            self.data.qvel.flat,
             self.get_body_com("torso").flat,
         ]).astype(np.float32).flatten()
 
@@ -48,18 +80,22 @@ class HalfCheetahVelEnv(HalfCheetahEnv):
         model-based control", 2012 
         (https://homes.cs.washington.edu/~todorov/papers/TodorovIROS12.pdf)
     """
-    def __init__(self, task={}, low=0.0, high=2.0):
-        self._task = task
+    def __init__(self, task={'velocity':1.0}, low=0.0, high=2.0):
+        
         self.low = low
         self.high = high
+        if type(task) == float:
+            self._task = {'velocity': task}
+        else:
+            self._task = task
 
-        self._goal_vel = task.get('velocity', 0.0)
+        self._goal_vel = self._task.get('velocity', 0.0)
         super(HalfCheetahVelEnv, self).__init__()
 
     def step(self, action):
-        xposbefore = self.sim.data.qpos[0]
+        xposbefore = self.data.qpos[0]
         self.do_simulation(action, self.frame_skip)
-        xposafter = self.sim.data.qpos[0]
+        xposafter = self.data.qpos[0]
 
         forward_vel = (xposafter - xposbefore) / self.dt
         forward_reward = -1.0 * abs(forward_vel - self._goal_vel)
@@ -68,10 +104,11 @@ class HalfCheetahVelEnv(HalfCheetahEnv):
         observation = self._get_obs()
         reward = forward_reward - ctrl_cost
         done = False
+        truncated = False
         infos = dict(reward_forward=forward_reward,
                      reward_ctrl=-ctrl_cost,
                      task=self._task)
-        return (observation, reward, done, infos)
+        return (observation, reward, done, truncated, infos)
 
     def sample_tasks(self, num_tasks):
         velocities = self.np_random.uniform(self.low, self.high, size=(num_tasks,))
@@ -107,9 +144,9 @@ class HalfCheetahDirEnv(HalfCheetahEnv):
         super(HalfCheetahDirEnv, self).__init__()
 
     def step(self, action):
-        xposbefore = self.sim.data.qpos[0]
+        xposbefore = self.data.qpos[0]
         self.do_simulation(action, self.frame_skip)
-        xposafter = self.sim.data.qpos[0]
+        xposafter = self.data.qpos[0]
 
         forward_vel = (xposafter - xposbefore) / self.dt
         forward_reward = self._goal_dir * forward_vel
@@ -118,10 +155,11 @@ class HalfCheetahDirEnv(HalfCheetahEnv):
         observation = self._get_obs()
         reward = forward_reward - ctrl_cost
         done = False
+        truncated = False
         infos = dict(reward_forward=forward_reward,
                      reward_ctrl=-ctrl_cost,
                      task=self._task)
-        return (observation, reward, done, infos)
+        return (observation, reward, done, truncated, infos)
 
     def sample_tasks(self, num_tasks):
         directions = 2 * self.np_random.binomial(1, p=0.5, size=(num_tasks,)) - 1
