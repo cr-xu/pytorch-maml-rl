@@ -8,6 +8,7 @@ import gymnasium as gym
 #         return env
 #     return _make_env
 
+
 class make_env:
     def __init__(self, env_name, env_kwargs={}, seed=None):
         self.env_name = env_name
@@ -15,20 +16,17 @@ class make_env:
         self.seed = seed
 
     def __call__(self):
-        env = gym.make(self.env_name, **self.env_kwargs)  # See: https://github.com/Farama-Foundation/Gymnasium/issues/77 # apply_api_compatibility=True, 
+        env = gym.make(
+            self.env_name, **self.env_kwargs
+        )  # See: https://github.com/Farama-Foundation/Gymnasium/issues/77 # apply_api_compatibility=True,
         # if hasattr(env, 'seed'):
         #     # env.seed(seed)
         #     env.reset(seed=self.seed)
         return env
 
+
 class Sampler(object):
-    def __init__(self,
-                 env_name,
-                 env_kwargs,
-                 batch_size,
-                 policy,
-                 seed=None,
-                 env=None):
+    def __init__(self, env_name, env_kwargs, batch_size, policy, seed=None, env=None):
         self.env_name = env_name
         self.env_kwargs = env_kwargs
         self.batch_size = batch_size
@@ -38,7 +36,7 @@ class Sampler(object):
         if env is None:
             env = gym.make(env_name, **env_kwargs)
         self.env = env
-        if hasattr(self.env, 'seed'):
+        if hasattr(self.env, "seed"):
             self.env.seed(seed)
         self.env.close()
         self.closed = False

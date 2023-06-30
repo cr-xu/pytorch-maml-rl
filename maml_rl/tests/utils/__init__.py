@@ -6,22 +6,24 @@ from gym.spaces import Box
 
 HEIGHT, WIDTH = 64, 64
 
+
 def make_unittest_env(length):
     def _make_env():
         return UnittestEnv(length)
+
     return _make_env
+
 
 class UnittestEnv(gym.Env):
     def __init__(self, max_length):
         super(UnittestEnv, self).__init__()
         self.max_length = max_length
         self._length = 0
-        
-        self.observation_space = Box(low=0,
-                                     high=255,
-                                     shape=(HEIGHT, WIDTH, 3),
-                                     dtype=np.uint8)
-        self.action_space = Box(low=0., high=1., shape=(2,), dtype=np.float32)
+
+        self.observation_space = Box(
+            low=0, high=255, shape=(HEIGHT, WIDTH, 3), dtype=np.uint8
+        )
+        self.action_space = Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
 
     def reset_task(self):
         pass

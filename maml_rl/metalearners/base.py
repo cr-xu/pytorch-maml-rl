@@ -5,7 +5,7 @@ from maml_rl.samplers import MultiTaskSampler
 
 
 class GradientBasedMetaLearner(object):
-    def __init__(self, policy, device='cpu'):
+    def __init__(self, policy, device="cpu"):
         self.device = torch.device(device)
         self.policy = policy
         self.policy.to(self.device)

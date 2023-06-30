@@ -8,7 +8,7 @@ from maml_rl.samplers.sampler import make_env
 from maml_rl.tests.utils import make_unittest_env
 
 
-@pytest.mark.parametrize('batch_size', [1, 8])
+@pytest.mark.parametrize("batch_size", [1, 8])
 def test_batch_episodes(batch_size):
     episodes = BatchEpisodes(batch_size, gamma=0.95)
     assert episodes.batch_size == batch_size
@@ -24,12 +24,12 @@ def test_batch_episodes_append():
     while not envs.dones.all():
         actions = [envs.single_action_space.sample() for _ in observations]
         new_observations, rewards, _, infos = envs.step(actions)
-        episodes.append(observations, actions, rewards, infos['batch_ids'])
+        episodes.append(observations, actions, rewards, infos["batch_ids"])
         observations = new_observations
 
     assert len(episodes) == 17
     assert episodes.lengths == lengths
-    
+
     # Observations
     assert episodes.observations.shape == (17, 7, 64, 64, 3)
     assert episodes.observations.dtype == torch.float32

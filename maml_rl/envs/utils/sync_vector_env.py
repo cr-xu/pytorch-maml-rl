@@ -4,22 +4,23 @@ from gymnasium.vector.utils import concatenate, create_empty_array
 
 
 class SyncVectorEnv(SyncVectorEnv_):
-    def __init__(self,
-                 env_fns,
-                 observation_space=None,
-                 action_space=None,
-                 **kwargs):
-        super(SyncVectorEnv, self).__init__(env_fns,
-                                            observation_space=observation_space,
-                                            action_space=action_space,
-                                            **kwargs)
+    def __init__(self, env_fns, observation_space=None, action_space=None, **kwargs):
+        super(SyncVectorEnv, self).__init__(
+            env_fns,
+            observation_space=observation_space,
+            action_space=action_space,
+            **kwargs
+        )
         for env in self.envs:
             # print("My env is:!", env.unwrapped.env.unwrapped)
-            if not hasattr(env.unwrapped, 'reset_task'):
-                raise ValueError('The environment provided is not a '
-                                 'meta-learning environment. It does not have '
-                                 'the method `reset_task` implemented.')
+            if not hasattr(env.unwrapped, "reset_task"):
+                raise ValueError(
+                    "The environment provided is not a "
+                    "meta-learning environment. It does not have "
+                    "the method `reset_task` implemented."
+                )
         self._dones = np.zeros((self.num_envs,), dtype=np.bool_)
+
     @property
     def dones(self):
         return self._dones
@@ -39,7 +40,7 @@ class SyncVectorEnv(SyncVectorEnv_):
                 continue
 
             action = self._actions[j]
-            observation, rewards[j], self._dones[i], _,  info = env.step(action)
+            observation, rewards[j], self._dones[i], _, info = env.step(action)
             batch_ids.append(i)
 
             if not self._dones[i]:
@@ -49,14 +50,20 @@ class SyncVectorEnv(SyncVectorEnv_):
         assert num_actions == j
 
         if observations_list:
-            observations = create_empty_array(self.single_observation_space,
-                                              n=len(observations_list),
-                                              fn=np.zeros)
+            observations = create_empty_array(
+                self.single_observation_space, n=len(observations_list), fn=np.zeros
+            )
             # concatenate(observations_list,
             #             observations,
             #             self.single_observation_space)
-            concatenate(self.single_observation_space,observations_list,observations)  # (space, items, out)
+            concatenate(
+                self.single_observation_space, observations_list, observations
+            )  # (space, items, out)
         else:
             observations = None
-        return (observations, rewards, np.copy(self._dones),
-                {'batch_ids': batch_ids, 'infos': infos})
+        return (
+            observations,
+            rewards,
+            np.copy(self._dones),
+            {"batch_ids": batch_ids, "infos": infos},
+        )

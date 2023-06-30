@@ -6,7 +6,7 @@ from maml_rl.utils.torch_utils import weighted_normalize
 
 
 class BatchEpisodes(object):
-    def __init__(self, batch_size, gamma=0.95, device='cpu'):
+    def __init__(self, batch_size, gamma=0.95, device="cpu"):
         self.batch_size = batch_size
         self.gamma = gamma
         self.device = device
@@ -43,13 +43,14 @@ class BatchEpisodes(object):
     def observations(self):
         if self._observations is None:
             observation_shape = self._observations_list[0][0].shape
-            observations = np.zeros((len(self), self.batch_size) + observation_shape,
-                                    dtype=np.float32)
+            observations = np.zeros(
+                (len(self), self.batch_size) + observation_shape, dtype=np.float32
+            )
             for i in range(self.batch_size):
                 length = self.lengths[i]
-                np.stack(self._observations_list[i],
-                         axis=0,
-                         out=observations[:length, i])
+                np.stack(
+                    self._observations_list[i], axis=0, out=observations[:length, i]
+                )
             self._observations = torch.as_tensor(observations, device=self.device)
             del self._observations_list
         return self._observations
@@ -58,8 +59,9 @@ class BatchEpisodes(object):
     def actions(self):
         if self._actions is None:
             action_shape = self._actions_list[0][0].shape
-            actions = np.zeros((len(self), self.batch_size) + action_shape,
-                               dtype=np.float32)
+            actions = np.zeros(
+                (len(self), self.batch_size) + action_shape, dtype=np.float32
+            )
             for i in range(self.batch_size):
                 length = self.lengths[i]
                 np.stack(self._actions_list[i], axis=0, out=actions[:length, i])
@@ -91,9 +93,9 @@ class BatchEpisodes(object):
     @property
     def mask(self):
         if self._mask is None:
-            self._mask = torch.zeros((len(self), self.batch_size),
-                                     dtype=torch.float32,
-                                     device=self.device)
+            self._mask = torch.zeros(
+                (len(self), self.batch_size), dtype=torch.float32, device=self.device
+            )
             for i in range(self.batch_size):
                 length = self.lengths[i]
                 self._mask[:length, i].fill_(1.0)
@@ -102,14 +104,17 @@ class BatchEpisodes(object):
     @property
     def advantages(self):
         if self._advantages is None:
-            raise ValueError('The advantages have not been computed. Call the '
-                             'function `episodes.compute_advantages(baseline)` '
-                             'to compute and store the advantages in `episodes`.')
+            raise ValueError(
+                "The advantages have not been computed. Call the "
+                "function `episodes.compute_advantages(baseline)` "
+                "to compute and store the advantages in `episodes`."
+            )
         return self._advantages
 
     def append(self, observations, actions, rewards, batch_ids):
         for observation, action, reward, batch_id in zip(
-                observations, actions, rewards, batch_ids):
+            observations, actions, rewards, batch_ids
+        ):
             if batch_id is None:
                 continue
             self._observations_list[batch_id].append(observation.astype(np.float32))
@@ -140,8 +145,9 @@ class BatchEpisodes(object):
 
         # Normalize the advantages
         if normalize:
-            self._advantages = weighted_normalize(self._advantages,
-                                                  lengths=self.lengths)
+            self._advantages = weighted_normalize(
+                self._advantages, lengths=self.lengths
+            )
         # Once the advantages are computed, the returns are not necessary
         # anymore (only to compute the parameters of the baseline)
         del self._returns

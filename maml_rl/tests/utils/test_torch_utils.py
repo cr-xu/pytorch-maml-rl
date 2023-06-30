@@ -4,8 +4,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from maml_rl.utils.torch_utils import (weighted_mean, weighted_normalize,
-                                       vector_to_parameters)
+from maml_rl.utils.torch_utils import (
+    weighted_mean,
+    weighted_normalize,
+    vector_to_parameters,
+)
 
 
 def test_weighted_mean():
@@ -13,7 +16,7 @@ def test_weighted_mean():
     # Inputs
     inputs_np = np.random.rand(13, 5).astype(np.float32)
     for i, length in enumerate(lengths):
-        inputs_np[length:, i] = 0.
+        inputs_np[length:, i] = 0.0
 
     # Pytorch
     inputs_th = torch.as_tensor(inputs_np)
@@ -37,7 +40,7 @@ def test_weighted_mean_multi_dimensional():
     # Inputs
     inputs_np = np.random.rand(13, 5, 17, 19).astype(np.float32)
     for i, length in enumerate(lengths):
-        inputs_np[length:, i] = 0.
+        inputs_np[length:, i] = 0.0
 
     # Pytorch
     inputs_th = torch.as_tensor(inputs_np)
@@ -66,8 +69,8 @@ def test_weighted_mean_side_effect():
     mean_th = weighted_mean(inputs_th, lengths=lengths)
 
     for i, length in enumerate(lengths):
-        assert (inputs_th[length:, i] == 0.).all()
-        assert (inputs_np[length:, i] == 0.).all()
+        assert (inputs_th[length:, i] == 0.0).all()
+        assert (inputs_np[length:, i] == 0.0).all()
 
 
 def test_weighted_normalize():
@@ -80,13 +83,11 @@ def test_weighted_normalize():
     normalized_th = weighted_normalize(inputs_th, lengths=lengths)
 
     for i, length in enumerate(lengths):
-        assert (normalized_th[length:, i] == 0.).all()
+        assert (normalized_th[length:, i] == 0.0).all()
 
 
 def test_vector_to_parameters_no_shared_memory():
-    model = nn.Sequential(
-        nn.Linear(2, 3, bias=True),
-        nn.Linear(3, 5, bias=True))
+    model = nn.Sequential(nn.Linear(2, 3, bias=True), nn.Linear(3, 5, bias=True))
     num_params = (2 * 3) + 3 + (3 * 5) + 5
     vector_np = np.random.rand(num_params).astype(np.float32)
     vector = torch.as_tensor(vector_np)
@@ -97,15 +98,15 @@ def test_vector_to_parameters_no_shared_memory():
         num_param = param.numel()
         param_np = param.view(-1).detach().numpy()
 
-        np.testing.assert_array_equal(param_np, vector_np[pointer:pointer + num_param])
+        np.testing.assert_array_equal(
+            param_np, vector_np[pointer : pointer + num_param]
+        )
 
         pointer += num_param
 
 
 def test_vector_to_parameters_shared_memory():
-    model = nn.Sequential(
-        nn.Linear(2, 3, bias=True),
-        nn.Linear(3, 5, bias=True))
+    model = nn.Sequential(nn.Linear(2, 3, bias=True), nn.Linear(3, 5, bias=True))
     model.share_memory()
 
     for param in model.parameters():
@@ -121,7 +122,9 @@ def test_vector_to_parameters_shared_memory():
         num_param = param.numel()
         param_np = param.view(-1).detach().numpy()
 
-        np.testing.assert_array_equal(param_np, vector_np[pointer:pointer + num_param])
+        np.testing.assert_array_equal(
+            param_np, vector_np[pointer : pointer + num_param]
+        )
         assert param.data.is_shared()
 
         pointer += num_param

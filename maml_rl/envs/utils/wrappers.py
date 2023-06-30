@@ -5,8 +5,8 @@ from maml_rl.envs.utils.normalized_env import NormalizedActionWrapper
 
 
 def mujoco_wrapper(entry_point, **kwargs):
-    normalization_scale = kwargs.pop('normalization_scale', 1.)
-    max_episode_steps = kwargs.pop('max_episode_steps', 200)
+    normalization_scale = kwargs.pop("normalization_scale", 1.0)
+    max_episode_steps = kwargs.pop("max_episode_steps", 200)
 
     # Load the environment from its entry point
     env_cls = load_env_creator(entry_point)
