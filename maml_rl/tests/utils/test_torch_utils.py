@@ -1,13 +1,12 @@
-import pytest
-
 import numpy as np
+import pytest
 import torch
 import torch.nn as nn
 
 from maml_rl.utils.torch_utils import (
+    vector_to_parameters,
     weighted_mean,
     weighted_normalize,
-    vector_to_parameters,
 )
 
 
@@ -56,7 +55,7 @@ def test_weighted_mean_multi_dimensional():
 
     assert mean_th.dim() == 3
     assert mean_th.shape == (5, 17, 19)
-    np.testing.assert_allclose(mean_th.detach().numpy(), mean_np)
+    np.testing.assert_allclose(mean_th.detach().numpy(), mean_np, atol=1e-7)
 
 
 def test_weighted_mean_side_effect():

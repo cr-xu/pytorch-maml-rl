@@ -65,5 +65,6 @@ class SyncVectorEnv(SyncVectorEnv_):
             observations,
             rewards,
             np.copy(self._dones),
+            np.zeros(len(self._dones), dtype=np.bool_),
             {"batch_ids": batch_ids, "infos": infos},
         )

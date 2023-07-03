@@ -1,5 +1,5 @@
 import numpy as np
-from gymnasium.envs.mujoco import AntEnv as AntEnv_
+from gymnasium.envs.mujoco.ant_v4 import AntEnv as AntEnv_
 
 
 class AntEnv(AntEnv_):

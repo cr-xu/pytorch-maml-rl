@@ -1,8 +1,7 @@
+import gymnasium as gym
 import numpy as np
-import gym
-
-from gym import spaces
-from gym.utils import seeding
+from gymnasium import spaces
+from gymnasium.utils import seeding
 
 
 class TabularMDPEnv(gym.Env):
@@ -69,13 +68,14 @@ class TabularMDPEnv(gym.Env):
         self._transitions = task["transitions"]
         self._rewards_mean = task["rewards_mean"]
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         # From [1]: "an episode always starts on the first state"
+        self.seed(seed)
         self._state = 0
         observation = np.zeros(self.num_states, dtype=np.float32)
         observation[self._state] = 1.0
 
-        return observation
+        return observation, {}
 
     def step(self, action):
         assert self.action_space.contains(action)
@@ -88,4 +88,4 @@ class TabularMDPEnv(gym.Env):
         observation = np.zeros(self.num_states, dtype=np.float32)
         observation[self._state] = 1.0
 
-        return observation, reward, False, {"task": self._task}
+        return observation, reward, False, False, {"task": self._task}

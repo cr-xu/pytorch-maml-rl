@@ -1,8 +1,7 @@
+import gymnasium as gym
 import numpy as np
-import gym
-
-from gym import spaces
-from gym.utils import seeding
+from gymnasium import spaces
+from gymnasium.utils import seeding
 
 
 class Navigation2DEnv(gym.Env):
@@ -48,9 +47,10 @@ class Navigation2DEnv(gym.Env):
         self._task = task
         self._goal = task["goal"]
 
-    def reset(self, env=True):
+    def reset(self, env=True, seed=None, options=None):
+        self.seed(seed)
         self._state = np.zeros(2, dtype=np.float32)
-        return self._state
+        return self._state, {}
 
     def step(self, action):
         action = np.clip(action, -0.1, 0.1)
@@ -62,4 +62,4 @@ class Navigation2DEnv(gym.Env):
         reward = -np.sqrt(x**2 + y**2)
         done = (np.abs(x) < 0.01) and (np.abs(y) < 0.01)
 
-        return self._state, reward, done, {"task": self._task}
+        return self._state, reward, done, False, {"task": self._task}

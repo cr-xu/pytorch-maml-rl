@@ -1,16 +1,16 @@
+import gymnasium as gym
+import numpy as np
 import pytest
 
-import numpy as np
-import gym
-
 import maml_rl.envs
-from maml_rl.samplers import MultiTaskSampler
-from maml_rl.episode import BatchEpisodes
 from maml_rl.baseline import LinearFeatureBaseline
-from maml_rl.utils.helpers import get_policy_for_env, get_input_size
+from maml_rl.episode import BatchEpisodes
+from maml_rl.samplers import MultiTaskSampler
+from maml_rl.utils.helpers import get_input_size, get_policy_for_env
 
 
 @pytest.mark.parametrize("env_name", ["TabularMDP-v0", "2DNavigation-v0"])
+# @pytest.mark.parametrize("num_workers", [1, 4])
 @pytest.mark.parametrize("num_workers", [1, 4])
 def test_init(env_name, num_workers):
     batch_size = 10
@@ -54,6 +54,7 @@ def test_sample(env_name, batch_size, num_tasks, num_steps, num_workers):
         num_workers=num_workers,
     )
     tasks = sampler.sample_tasks(num_tasks=num_tasks)
+    # print(tasks)
     train_episodes, valid_episodes = sampler.sample(tasks, num_steps=num_steps)
     sampler.close()
 

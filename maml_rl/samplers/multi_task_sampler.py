@@ -291,6 +291,7 @@ class SamplerWorker(mp.Process):
     def create_episodes(self, params=None, gamma=0.95, gae_lambda=1.0, device="cpu"):
         episodes = BatchEpisodes(batch_size=self.batch_size, gamma=gamma, device=device)
         episodes.log("_createdAt", datetime.now(timezone.utc))
+        print("ceate episodes", datetime.now(timezone.utc))
         episodes.log("process_name", self.name)
 
         t0 = time.time()
@@ -313,7 +314,7 @@ class SamplerWorker(mp.Process):
                 actions_tensor = pi.sample()
                 actions = actions_tensor.cpu().numpy()
 
-                new_observations, rewards, _, infos = self.envs.step(actions)
+                new_observations, rewards, _, _, infos = self.envs.step(actions)
                 batch_ids = infos["batch_ids"]
                 yield (observations, actions, rewards, batch_ids)
                 observations = new_observations

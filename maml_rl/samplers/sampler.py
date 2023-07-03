@@ -17,8 +17,9 @@ class make_env:
 
     def __call__(self):
         env = gym.make(
-            self.env_name, **self.env_kwargs
-        )  # See: https://github.com/Farama-Foundation/Gymnasium/issues/77 # apply_api_compatibility=True,
+            self.env_name, **self.env_kwargs,
+        )
+          # See: https://github.com/Farama-Foundation/Gymnasium/issues/77 # apply_api_compatibility=True,
         # if hasattr(env, 'seed'):
         #     # env.seed(seed)
         #     env.reset(seed=self.seed)
@@ -37,7 +38,7 @@ class Sampler(object):
             env = gym.make(env_name, **env_kwargs)
         self.env = env
         if hasattr(self.env, "seed"):
-            self.env.seed(seed)
+            self.env.reset(seed=seed)
         self.env.close()
         self.closed = False
 

@@ -6,7 +6,7 @@ from maml_rl.envs.utils.normalized_env import NormalizedActionWrapper
 
 def mujoco_wrapper(entry_point, **kwargs):
     normalization_scale = kwargs.pop("normalization_scale", 1.0)
-    max_episode_steps = kwargs.pop("max_episode_steps", 200)
+    # max_episode_steps = kwargs.pop("max_episode_steps", 200)
 
     # Load the environment from its entry point
     env_cls = load_env_creator(entry_point)
@@ -16,6 +16,6 @@ def mujoco_wrapper(entry_point, **kwargs):
     env = NormalizedActionWrapper(env, scale=normalization_scale)
 
     # Time limit
-    env = TimeLimit(env, max_episode_steps=max_episode_steps)
+    # env = TimeLimit(env, max_episode_steps=max_episode_steps)
 
     return env

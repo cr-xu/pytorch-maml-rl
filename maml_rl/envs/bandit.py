@@ -1,8 +1,7 @@
+import gymnasium as gym
 import numpy as np
-import gym
-
-from gym import spaces
-from gym.utils import seeding
+from gymnasium import spaces
+from gymnasium.utils import seeding
 
 
 class BernoulliBanditEnv(gym.Env):
@@ -35,7 +34,7 @@ class BernoulliBanditEnv(gym.Env):
         return [seed]
 
     def sample_tasks(self, num_tasks):
-        means = self.np_random.rand(num_tasks, self.k)
+        means = self.np_random.random((num_tasks, self.k))
         tasks = [{"mean": mean} for mean in means]
         return tasks
 
@@ -43,8 +42,9 @@ class BernoulliBanditEnv(gym.Env):
         self._task = task
         self._means = task["mean"]
 
-    def reset(self):
-        return np.zeros(1, dtype=np.float32)
+    def reset(self, *, seed=None, options=None):
+        self.seed(seed)
+        return np.zeros(1, dtype=np.float32), {}
 
     def step(self, action):
         assert self.action_space.contains(action)
@@ -52,7 +52,7 @@ class BernoulliBanditEnv(gym.Env):
         reward = self.np_random.binomial(1, mean)
         observation = np.zeros(1, dtype=np.float32)
 
-        return observation, reward, True, {"task": self._task}
+        return observation, reward, True, False, {"task": self._task}
 
 
 class GaussianBanditEnv(gym.Env):
@@ -91,7 +91,7 @@ class GaussianBanditEnv(gym.Env):
         self._means = task["mean"]
 
     def reset(self):
-        return np.zeros(1, dtype=np.float32)
+        return np.zeros(1, dtype=np.float32), {}
 
     def step(self, action):
         assert self.action_space.contains(action)
@@ -99,4 +99,4 @@ class GaussianBanditEnv(gym.Env):
         reward = self.np_random.normal(mean, self.std)
         observation = np.zeros(1, dtype=np.float32)
 
-        return observation, reward, True, {"task": self._task}
+        return observation, reward, True, False, {"task": self._task}

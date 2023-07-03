@@ -1,8 +1,6 @@
-import gym
+import gymnasium as gym
 import numpy as np
-
-from gym.spaces import Box
-
+from gymnasium.spaces import Box
 
 HEIGHT, WIDTH = 64, 64
 
@@ -30,10 +28,10 @@ class UnittestEnv(gym.Env):
 
     def reset(self):
         self._length = 0
-        return self.observation_space.sample()
+        return self.observation_space.sample(), {}
 
     def step(self, action):
         observation = self.observation_space.sample()
         self._length += 1
         reward, done = 0, (self._length >= self.max_length)
-        return (observation, reward, done, {})
+        return (observation, reward, done, False, {})
