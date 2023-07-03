@@ -291,14 +291,12 @@ class SamplerWorker(mp.Process):
     def create_episodes(self, params=None, gamma=0.95, gae_lambda=1.0, device="cpu"):
         episodes = BatchEpisodes(batch_size=self.batch_size, gamma=gamma, device=device)
         episodes.log("_createdAt", datetime.now(timezone.utc))
-        print("ceate episodes", datetime.now(timezone.utc))
         episodes.log("process_name", self.name)
 
         t0 = time.time()
         for item in self.sample_trajectories(params=params):
             episodes.append(*item)
         episodes.log("duration", time.time() - t0)
-
         self.baseline.fit(episodes)
         episodes.compute_advantages(
             self.baseline, gae_lambda=gae_lambda, normalize=True

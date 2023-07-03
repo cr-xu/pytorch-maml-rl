@@ -66,12 +66,15 @@ class LinearFeatureBaseline(nn.Module):
         XT_X = torch.matmul(featmat.t(), featmat)
         for _ in range(5):
             try:
-                coeffs= torch.linalg.lstsq(XT_y, XT_X + reg_coeff * self._eye)
+                coeffs = torch.linalg.lstsq(XT_y, XT_X + reg_coeff * self._eye)
                 # coeffs, _ = torch.lstsq(XT_y, XT_X + reg_coeff * self._eye)
 
                 # An extra round of increasing regularization eliminated
                 # inf or nan in the least-squares solution most of the time
-                if torch.isnan(coeffs.solution).any() or torch.isinf(coeffs.solution).any():
+                if (
+                    torch.isnan(coeffs.solution).any()
+                    or torch.isinf(coeffs.solution).any()
+                ):
                     raise RuntimeError
 
                 break

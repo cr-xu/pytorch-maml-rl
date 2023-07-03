@@ -17,9 +17,10 @@ class make_env:
 
     def __call__(self):
         env = gym.make(
-            self.env_name, **self.env_kwargs,
+            self.env_name,
+            **self.env_kwargs,
         )
-          # See: https://github.com/Farama-Foundation/Gymnasium/issues/77 # apply_api_compatibility=True,
+        # See: https://github.com/Farama-Foundation/Gymnasium/issues/77 # apply_api_compatibility=True,
         # if hasattr(env, 'seed'):
         #     # env.seed(seed)
         #     env.reset(seed=self.seed)

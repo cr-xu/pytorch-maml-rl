@@ -103,7 +103,7 @@ if __name__ == "__main__":
     import argparse
     import multiprocessing as mp
 
-    mp.set_start_method('spawn')
+    mp.set_start_method("spawn")
     parser = argparse.ArgumentParser(
         description="Reinforcement learning with "
         "Model-Agnostic Meta-Learning (MAML) - Train"

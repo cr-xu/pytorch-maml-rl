@@ -1,13 +1,14 @@
-import maml_rl.envs
-import gym
-import torch
 import json
+
+import gymnasium as gym
 import numpy as np
+import torch
 from tqdm import trange
 
+import maml_rl.envs
 from maml_rl.baseline import LinearFeatureBaseline
 from maml_rl.samplers import MultiTaskSampler
-from maml_rl.utils.helpers import get_policy_for_env, get_input_size
+from maml_rl.utils.helpers import get_input_size, get_policy_for_env
 from maml_rl.utils.reinforcement_learning import get_returns
 
 
@@ -72,8 +73,8 @@ def main(args):
 
 if __name__ == "__main__":
     import argparse
-    import os
     import multiprocessing as mp
+    import os
 
     parser = argparse.ArgumentParser(
         description="Reinforcement learning with "

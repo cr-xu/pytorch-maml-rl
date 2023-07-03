@@ -1,3 +1,5 @@
+from typing import List, Optional, Union
+
 import numpy as np
 from gymnasium.vector import SyncVectorEnv as SyncVectorEnv_
 from gymnasium.vector.utils import concatenate, create_empty_array
@@ -9,10 +11,9 @@ class SyncVectorEnv(SyncVectorEnv_):
             env_fns,
             observation_space=observation_space,
             action_space=action_space,
-            **kwargs
+            **kwargs,
         )
         for env in self.envs:
-            # print("My env is:!", env.unwrapped.env.unwrapped)
             if not hasattr(env.unwrapped, "reset_task"):
                 raise ValueError(
                     "The environment provided is not a "
@@ -24,6 +25,15 @@ class SyncVectorEnv(SyncVectorEnv_):
     @property
     def dones(self):
         return self._dones
+
+    def reset(
+        self,
+        *,
+        seed: Optional[Union[int, List[int]]] = None,
+        options: Optional[dict] = None,
+    ):
+        self._dones = np.zeros((self.num_envs,), dtype=np.bool_)
+        return super(SyncVectorEnv, self).reset(seed=seed, options=options)
 
     def reset_task(self, task):
         for env in self.envs:
