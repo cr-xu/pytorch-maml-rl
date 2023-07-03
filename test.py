@@ -19,8 +19,8 @@ def main(args):
     if args.seed is not None:
         torch.manual_seed(args.seed)
         torch.cuda.manual_seed_all(args.seed)
-
-    env = gym.make(config["env-name"], **config["env-kwargs"])
+    max_episode_steps = config.get("max_episode_steps", 100)
+    env = gym.make(config["env-name"], max_episode_steps=max_episode_steps, **config["env-kwargs"])
     env.close()
 
     # Policy

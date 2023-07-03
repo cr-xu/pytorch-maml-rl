@@ -1,9 +1,8 @@
 import pytest
-
 import torch
 
-from maml_rl.episode import BatchEpisodes
 from maml_rl.envs.utils.sync_vector_env import SyncVectorEnv
+from maml_rl.episode import BatchEpisodes
 from maml_rl.samplers.sampler import make_env
 from maml_rl.tests.utils import make_unittest_env
 
@@ -20,10 +19,10 @@ def test_batch_episodes_append():
     envs = SyncVectorEnv([make_unittest_env(length) for length in lengths])
     episodes = BatchEpisodes(batch_size=len(lengths), gamma=0.95)
 
-    observations = envs.reset()
+    observations, _ = envs.reset()
     while not envs.dones.all():
         actions = [envs.single_action_space.sample() for _ in observations]
-        new_observations, rewards, _, infos = envs.step(actions)
+        new_observations, rewards, _, _, infos = envs.step(actions)
         episodes.append(observations, actions, rewards, infos["batch_ids"])
         observations = new_observations
 

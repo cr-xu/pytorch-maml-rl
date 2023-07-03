@@ -16,7 +16,7 @@ class HalfCheetahEnv(HalfCheetahEnv_):
         ctrl_cost_weight=0.1,
         reset_noise_scale=0.1,
         **kwargs
-    ):
+    ):  
         utils.EzPickle.__init__(
             self,
             forward_reward_weight,
@@ -90,7 +90,7 @@ class HalfCheetahVelEnv(HalfCheetahEnv):
         (https://homes.cs.washington.edu/~todorov/papers/TodorovIROS12.pdf)
     """
 
-    def __init__(self, task={"velocity": 1.0}, low=0.0, high=2.0):
+    def __init__(self, task={"velocity": 1.0}, low=0.0, high=2.0, **kwargs):
         self.low = low
         self.high = high
         if type(task) == float:
@@ -99,7 +99,7 @@ class HalfCheetahVelEnv(HalfCheetahEnv):
             self._task = task
 
         self._goal_vel = self._task.get("velocity", 0.0)
-        super(HalfCheetahVelEnv, self).__init__()
+        super(HalfCheetahVelEnv, self).__init__(**kwargs)
 
     def step(self, action):
         xposbefore = self.data.qpos[0]

@@ -20,20 +20,20 @@ class SyncVectorEnv(SyncVectorEnv_):
                     "meta-learning environment. It does not have "
                     "the method `reset_task` implemented."
                 )
-        self._dones = np.zeros((self.num_envs,), dtype=np.bool_)
+        # self._dones = np.zeros((self.num_envs,), dtype=np.bool_)
 
-    @property
-    def dones(self):
-        return self._dones
+    # @property
+    # def dones(self):
+    #     return self._dones
 
-    def reset(
-        self,
-        *,
-        seed: Optional[Union[int, List[int]]] = None,
-        options: Optional[dict] = None,
-    ):
-        self._dones = np.zeros((self.num_envs,), dtype=np.bool_)
-        return super(SyncVectorEnv, self).reset(seed=seed, options=options)
+    # def reset(
+    #     self,
+    #     *,
+    #     seed: Optional[Union[int, List[int]]] = None,
+    #     options: Optional[dict] = None,
+    # ):
+    #     self._dones = np.zeros((self.num_envs,), dtype=np.bool_)
+    #     return super(SyncVectorEnv, self).reset(seed=seed, options=options)
 
     def reset_task(self, task):
         for env in self.envs:
@@ -46,14 +46,14 @@ class SyncVectorEnv(SyncVectorEnv_):
         num_actions = len(self._actions)
         rewards = np.zeros((num_actions,), dtype=np.float_)
         for i, env in enumerate(self.envs):
-            if self._dones[i]:
+            if self._terminateds[i] or self._truncateds[i]:
                 continue
 
             action = self._actions[j]
-            observation, rewards[j], self._dones[i], _, info = env.step(action)
+            observation, rewards[j], self._terminateds[i], self._truncateds[i], info = env.step(action)
             batch_ids.append(i)
 
-            if not self._dones[i]:
+            if not self._terminateds[i] and not self._truncateds[i]:
                 observations_list.append(observation)
                 infos.append(info)
             j += 1
@@ -74,7 +74,7 @@ class SyncVectorEnv(SyncVectorEnv_):
         return (
             observations,
             rewards,
-            np.copy(self._dones),
-            np.zeros(len(self._dones), dtype=np.bool_),
+            np.copy(self._terminateds),
+            np.copy(self._truncateds),
             {"batch_ids": batch_ids, "infos": infos},
         )

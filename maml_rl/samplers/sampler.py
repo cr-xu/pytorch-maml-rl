@@ -10,14 +10,16 @@ import gymnasium as gym
 
 
 class make_env:
-    def __init__(self, env_name, env_kwargs={}, seed=None):
+    def __init__(self, env_name, max_episode_steps, env_kwargs={}, seed=None):
         self.env_name = env_name
+        self.max_episode_steps = max_episode_steps
         self.env_kwargs = env_kwargs
         self.seed = seed
 
     def __call__(self):
         env = gym.make(
             self.env_name,
+            max_episode_steps=self.max_episode_steps,
             **self.env_kwargs,
         )
         # See: https://github.com/Farama-Foundation/Gymnasium/issues/77 # apply_api_compatibility=True,

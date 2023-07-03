@@ -4,6 +4,7 @@ import time
 from copy import deepcopy
 from datetime import datetime, timezone
 
+import numpy as np
 import torch
 import torch.multiprocessing as mp
 
@@ -68,6 +69,7 @@ class MultiTaskSampler(Sampler):
     def __init__(
         self,
         env_name,
+        max_episode_length,
         env_kwargs,
         batch_size,
         policy,
@@ -90,6 +92,7 @@ class MultiTaskSampler(Sampler):
             SamplerWorker(
                 index,
                 env_name,
+                max_episode_length,
                 env_kwargs,
                 batch_size,
                 self.env.observation_space,
@@ -225,6 +228,7 @@ class SamplerWorker(mp.Process):
         self,
         index,
         env_name,
+        max_episode_steps,
         env_kwargs,
         batch_size,
         observation_space,
@@ -239,7 +243,7 @@ class SamplerWorker(mp.Process):
     ):
         super(SamplerWorker, self).__init__()
 
-        env_fns = [make_env(env_name, env_kwargs=env_kwargs) for _ in range(batch_size)]
+        env_fns = [make_env(env_name, max_episode_steps, env_kwargs=env_kwargs) for _ in range(batch_size)]
         self.envs = SyncVectorEnv(
             env_fns, observation_space=observation_space, action_space=action_space
         )
@@ -306,7 +310,7 @@ class SamplerWorker(mp.Process):
     def sample_trajectories(self, params=None):
         observations, _ = self.envs.reset()
         with torch.no_grad():
-            while not self.envs.dones.all():
+            while not (self.envs._terminateds.all() or self.envs._truncateds.all()):
                 observations_tensor = torch.from_numpy(observations)
                 pi = self.policy(observations_tensor, params=params)
                 actions_tensor = pi.sample()
@@ -314,7 +318,7 @@ class SamplerWorker(mp.Process):
 
                 new_observations, rewards, _, _, infos = self.envs.step(actions)
                 batch_ids = infos["batch_ids"]
-                yield (observations, actions, rewards, batch_ids)
+                yield (observations, actions, rewards, batch_ids)       
                 observations = new_observations
 
     def run(self):
